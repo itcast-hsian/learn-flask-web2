@@ -161,3 +161,31 @@ class User(UserMixin, db.Model):
 
 
 
+## 权限管理
+
+**应用中的各项权限**
+
+| 操作                    | 权限名     | 权限值 |
+| ----------------------- | ---------- | ------ |
+| 关注用户                | `FOLLOW`   | `1`    |
+| 在他人的文章中发表评论` | `COMMENT`  | `2`    |
+| 写文章`                 | `WRITE`    | `4`    |
+| 管理他人发表的评论`     | `MODERATE` | `8`    |
+| 管理员权限`             | `ADMIN`    | `16`   |
+
+> 使用 2 的幂表示权限值有个好处：每种不同的权限组合对应的值都是唯一的，
+
+
+
+注意：应该把 Flask 的 `route` 装饰器放在首，比如
+
+```python
+@main.route('/admin')
+@login_required
+@admin_required
+def for_admins_only():
+    return "For administrators!"
+```
+
+
+
