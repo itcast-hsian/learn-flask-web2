@@ -158,3 +158,8 @@ def change_email(token):
 	else:
 		flash('Invalid request.')
 	return redirect(url_for('main.index'))
+
+@auth.before_app_request
+def before_request():
+	if current_user.is_authenticated:
+		current_user.ping()

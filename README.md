@@ -189,3 +189,15 @@ def for_admins_only():
 
 
 
+## flask-login
+
+`current_user._get_current_object())`
+
+```python
+current_user.name = form.name.data
+current_user.location = form.location.data
+current_user.about_me = form.about_me.data
+
+db.session.add(current_user._get_current_object())
+```
+
