@@ -15,6 +15,8 @@ class Config:
 
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+	PER_PAGE = 10
+
 	@staticmethod
 	def init_app(app):
 		pass

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>{{ title }}</h1>
+    <ul>
+        {% for follow in follows %}
+        <li>
+            <div>
+                <a href="{{ url_for('main.user', username=follow.user.username) }}">
+                    {{ follow.user.username }}
+                </a>     
+            </div>
+            {{ moment(follow.timestamp).fromNow() }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+</div>
+{% endblock %}

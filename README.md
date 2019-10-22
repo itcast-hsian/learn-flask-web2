@@ -22,6 +22,18 @@ venv\Scripts\activate
 pip freeze
 ```
 
+生成需求文件
+
+```
+pip freeze >requirements.txt
+```
+
+安装命令
+
+```
+pip install -r requirements.txt
+```
+
 
 
 ## 启动项目
@@ -74,7 +86,7 @@ flask run
 
 ## sqlalchemy数据库框架
 
-常见数据库配置URL：
+**常见数据库配置URL：**
 
 | 数据库引擎             | URL                                              |
 | ---------------------- | ------------------------------------------------ |
@@ -106,6 +118,51 @@ flask run
 > 对第一个迁移来说，其作用与调用 `db.create_all()` 方法一样。但在后续的迁移中，`flask db upgrade` 命令能把改动应用到数据库中，且不影响其中保存的数据。
 >
 > aaamwlfobbkcbvbgbe
+
+
+
+**`lazy='dynamic`说明：**
+
+指定了 `lazy='dynamic'` 参数，所以返回的查询可接受额外的过滤器。
+
+```
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    classes = db.relationship('Class',
+                              secondary=registrations,
+                              backref=db.backref('students', lazy='dynamic'),
+                              lazy='dynamic')
+```
+
+```
+student.classes.all()
+```
+
+> 方法包含了all(), remove(), filter_by()等方法。
+
+
+
+**多对多数据库查询**
+
+```
+class User(UserMixin, db.Model):
+    # ...
+    followed = db.relationship('Follow',
+                               foreign_keys=[Follow.follower_id],
+                               backref=db.backref('follower', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+    followers = db.relationship('Follow',
+                                foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
+```
+
+在这段代码中，`followed` 和 `followers` 关系都定义为单独的一对多关系。注意，为了消除外键间的歧义，定义关系时必须使用可选参数 `foreign_keys` 指定外键。而且，**`db.backref()` 参数并不是指定这两个关系之间的引用关系，而是回引 `Follow` 模型。**
+
+回引中的 `lazy` 参数指定为 `joined`。这种 `lazy` 模式可以实现立即从联结查询中加载相关对象。**例如，如果某个用户关注了 100 个用户，调用 `user.followed.all()` 后会返回一个列表，其中包含 100 个 `Follow` 实例，每一个实例的 `follower` 和 `followed` 回引属性都指向相应的用户。**设定为 `lazy='joined'` 模式，就可在一次数据库查询中完成这些操作。如果把 `lazy` 设为默认值 `select`，那么首次访问 `follower` 和 `followed` 属性时才会加载对应的用户，而且每个属性都需要一个单独的查询，这就意味着获取全部被关注用户时需要增加 100 次额外的数据库查询。
 
 
 
@@ -191,7 +248,7 @@ def for_admins_only():
 
 ## flask-login
 
-`current_user._get_current_object())`
+**`current_user._get_current_object())`获取user对象:**
 
 ```python
 current_user.name = form.name.data
@@ -200,4 +257,20 @@ current_user.about_me = form.about_me.data
 
 db.session.add(current_user._get_current_object())
 ```
+
+
+
+## 其他
+
+**获取路由参数:**
+
+`type=int` 确保参数在无法转换成整数时返回默认值。
+
+```
+request.args.get(参数名, 默认值, type=int)
+```
+
+
+
+
 

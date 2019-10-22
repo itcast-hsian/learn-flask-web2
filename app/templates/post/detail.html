@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %} Post List {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Post List </h1>
+</div>
+<div class="post-content">
+    <div class="post-head">
+        <a href="{{ url_for('main.user', username=post.author.username) }}">
+            {{ post.author.username }}
+        </a> 
+        {{ moment(post.timestamp).fromNow() }}
+    </div>
+    <div class="post-body">{{ post.body }}</div>
+    <a href="{{ url_for('post.edit', id=post.id) }}">
+        编辑
+    </a> 
+</div>
+{% endblock %}

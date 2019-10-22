@@ -24,6 +24,10 @@ def login():
 				next = url_for('main.index')
 			return redirect(next)
 		flash('Invalid username or password.')
+
+	if current_user.is_anonymous is False:
+		return redirect(url_for('main.index'))
+	
 	return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
