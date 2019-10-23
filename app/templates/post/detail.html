@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block title %} Post List {% endblock %}
 
@@ -17,5 +19,23 @@
     <a href="{{ url_for('post.edit', id=post.id) }}">
         编辑
     </a> 
+</div>
+
+<h4>评论列表 ({{ post.comments.count() }}) 条</h4>
+<div>
+    {% if current_user.can(Permission.COMMENT) %}
+    {{ wtf.quick_form(form) }}
+    {% endif %}
+</div>
+<ul>
+    {% for comment in comments %}
+    <li>
+        <p>{{comment.author.username}} {{ moment(comment.timestamp).fromNow() }}</p>
+        <p>{{comment.body}}</p>
+    </li>
+    {% endfor %}
+</ul>
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.detail', id=post.id) }}
 </div>
 {% endblock %}

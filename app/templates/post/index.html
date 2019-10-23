@@ -13,6 +13,12 @@
     {{ wtf.quick_form(form) }}
     {% endif %}
 </div>
+<a class="btn" href="{{ url_for('post.show_all') }}">
+    所有
+</a> 
+<a class="btn" href="{{ url_for('post.show_followed') }}">
+    关注
+</a> 
 <ul class="posts">
     {% for post in posts %}
     <li class="post">

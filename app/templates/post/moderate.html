@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Comment Moderation{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Comment Moderation</h1>
+</div>
+{% set moderate = True %}
+<ul>
+    {% for comment in comments %}
+    <li>
+        <p>{{comment.author.username}} {{ moment(comment.timestamp).fromNow() }}</p>
+        <p>{{comment.body}}</p>
+        <br>
+        {% if comment.disabled %}
+        <a class="btn btn-default btn-xs" href="{{ url_for('.moderate_enable',
+            id=comment.id, page=page) }}">Enable</a>
+        {% else %}
+        <a class="btn btn-danger btn-xs" href="{{ url_for('.moderate_disable',
+            id=comment.id, page=page) }}">Disable</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.moderate') }}
+</div>
+{% endif %}
+{% endblock %}

@@ -166,6 +166,34 @@ class User(UserMixin, db.Model):
 
 
 
+**更新已有数据的技巧**
+
+比如把已经存在的用户，把自己设为自己的关注者
+
+```python
+class User(UserMixin, db.Model):
+    # ...
+    @staticmethod
+    def add_self_follows():
+        for user in User.query.all():
+            if not user.is_following(user):
+                user.follow(user)
+                db.session.add(user)
+                db.session.commit()
+    # ...
+```
+
+现在，可以在 shell 中运行这个函数，更新数据库：
+
+```
+(venv) $ flask shell
+>>> User.add_self_follows()
+```
+
+`创建函数更新数据库这一技术经常用来更新已部署的应用，`因为运行脚本更新比手动更新数据库更少出错。
+
+
+
 ## `itsdangerous`生成确认令牌
 
 
@@ -271,6 +299,17 @@ request.args.get(参数名, 默认值, type=int)
 ```
 
 
+
+**cookie**
+
+```python
+# 获取cookie
+request.cookies.get('show_followed', '')
+
+# 设置cookie
+resp = make_response(redirect(url_for('.index'))) # 创建响应对象
+resp.set_cookie('show_followed', '', max_age=30*24*60*60) # 30天
+```
 
 
 

@@ -120,6 +120,7 @@ class User(UserMixin, db.Model):
 
 	# dynamic（不加载记录，但提供加载记录的查询） user.posts返回查询语句
 	posts = db.relationship('Post', backref='author', lazy='dynamic')
+	comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
 	def __init__(self, **kwargs):
 		super(User, self).__init__(**kwargs)
@@ -233,6 +234,12 @@ class User(UserMixin, db.Model):
 		return self.followers.filter_by(
 			follower_id=user.id).first() is not None
 
+	@property
+	def followed_posts(self):
+		# 先找出所有被关注过的人的文章，再从文章中过滤出关注者是当前用户，注意该属性返回的是查询
+		return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+			.filter(Follow.follower_id == self.id)
+
 	def __repr__(self):
 		return '<User %r>' % self.username
 
@@ -249,5 +256,21 @@ class Post(db.Model):
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+	comments = db.relationship('Comment', backref='post', lazy="dynamic")
 
+class Comment(db.Model):
+	__tablename__ = 'comments'
+	id = db.Column(db.Integer, primary_key=True)
+	body = db.Column(db.Text)
+	body_html = db.Column(db.Text)
+	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	disabled = db.Column(db.Boolean)
+	author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+	post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
+	# 原本是要过滤markdown的方法的
+	@staticmethod
+	def on_changed_body(self, value, oldvalue, initiator):
+		self.body_html = value
+
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
