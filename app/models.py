@@ -1,5 +1,5 @@
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from datetime import datetime
@@ -257,6 +257,19 @@ class User(UserMixin, db.Model):
 	def __repr__(self):
 		return '<User %r>' % self.username
 
+	def to_json(self):
+		json_user = {
+			'url': url_for('api.get_user', id=self.id),
+			'username': self.username,
+			'member_since': self.member_since,
+			'last_seen': self.last_seen,
+			'posts_url': url_for('api.get_user_posts', id=self.id),
+			'followed_posts_url': url_for('api.get_user_followed_posts',
+											id=self.id),
+			'post_count': self.posts.count()
+		}
+		return json_user
+
 # 该方法会获取已登录的用户，应该会把当前用户写入到session，写入到current_user
 @login_manager.user_loader
 def load_user(user_id):
@@ -269,8 +282,25 @@ class Post(db.Model):
 	body = db.Column(db.Text)
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
 	comments = db.relationship('Comment', backref='post', lazy="dynamic")
+
+	def to_json(self):
+		json_post = {
+			'url': url_for('api.get_post', id=self.id),
+			'body': self.body,
+			'timestamp': self.timestamp,
+			'author_url': url_for('api.get_user', id=self.author_id),
+			'comments_url': url_for('api.get_post_comments', id=self.id),
+			'comment_count': self.comments.count()
+		}
+		return json_post
+
+	@staticmethod
+	def from_json(json_post):
+		body = json_post.get('body')
+		if body is None or body == '':
+			raise ValidationError('post does not have a body')
+		return Post(body=body)
 
 class Comment(db.Model):
 	__tablename__ = 'comments'

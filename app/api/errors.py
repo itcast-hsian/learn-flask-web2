@@ -1,5 +1,7 @@
 from flask import request, render_template, jsonify
 from ..main import main
+from ..exceptions import ValidationError
+from . import api
 
 @main.app_errorhandler(404)
 def page_not_found(e):
@@ -25,3 +27,9 @@ def unauthorized(message):
     response = jsonify({'error': 'unauthorized', 'message': message})
     response.status_code = 401
     return response
+
+# 全局有效,省去每个api接口去捕获错误, ValidationError是自定义的
+@api.errorhandler(ValidationError)
+def validation_error(e):
+    # 只要ValidationError错误触发就执行bad_request
+    return bad_request(e.args[0])
