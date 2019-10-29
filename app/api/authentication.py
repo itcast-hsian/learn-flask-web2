@@ -51,7 +51,8 @@ def auth_error():
 @api.route('/tokens/', methods=['POST'])
 def get_token():
     try:
-        email, password = request.form['email'], request.form['password']
+        # email, password = request.form['email'], request.form['password']
+        email, password = request.json['email'], request.json['password']
         user = User.query.filter_by(email = email).first()
         if not user:
             return unauthorized('Invalid email')

@@ -30,6 +30,8 @@ class TestingConfig(Config):
 	TESTING = True
 	SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
 		'sqlite://'
+	# 禁用表单 CSRF 保护机制
+	WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
 	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
